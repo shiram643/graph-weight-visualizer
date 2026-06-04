@@ -196,7 +196,7 @@ button:hover {
 
 /* 最短路探索エリア */
 .shortest-path-section {
-    height: 16%; /* 全体の約1/5 */
+    height: 14%; /* 全体の約1/5 */
     min-height: 140px; /* 入力欄が大きいため最低限の高さ */
     background-color: rgba(255, 193, 7, 0.05);
     border: 1px solid rgba(255, 193, 7, 0.2);
