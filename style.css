@@ -1,0 +1,690 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+/* 起動スプラッシュ画面（旧タイトル） */
+h1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6rem; /* 大幅に拡大 */
+    color: #007bff;
+    background-color: rgba(255, 255, 255, 0.75); /* 起動中はUIを薄く隠す */
+    z-index: 5000;
+    pointer-events: all; /* 起動中は背後の操作を不可にする */
+    transition: opacity 0.8s ease, visibility 0.8s;
+    white-space: nowrap;
+    text-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
+}
+
+/* 共通のサイドパネルスタイル */
+.sidebar-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    padding: 10px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    z-index: 2000;
+    transition: transform 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* 左パネル（入力/設定パネル） */
+#sidebar-left {
+    left: 0;
+    border-right: 1px solid #dee2e6;
+}
+
+#sidebar-left.closed {
+    transform: translateX(-100%);
+}
+
+/* 右パネル（操作/設定パネル） */
+#sidebar-right {
+    right: 0;
+    border-left: 1px solid #dee2e6;
+}
+
+#sidebar-right.closed {
+    transform: translateX(100%);
+}
+
+/* パネル開閉ボタン共通 */
+.toggle-btn {
+    position: absolute;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    font-size: 1.2rem;
+    color: #333;
+}
+
+#toggle-left {
+    right: -40px;
+    border-left: none;
+    border-radius: 0 4px 4px 0;
+}
+
+#toggle-right {
+    left: -40px;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+}
+
+.toggle-btn:hover {
+    background-color: #e9ecef;
+}
+
+#main {
+    flex-grow: 1;
+    position: relative;
+    background-color: #ffffff;
+    width: 100%;
+}
+
+#cy {
+    width: 100%;
+    height: 100%;
+}
+
+.description {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+textarea {
+    flex-grow: 1;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 1.5rem;
+    resize: none;
+    margin-bottom: 1rem;
+    box-sizing: border-box;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.controls {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.control-btn {
+    padding: 8px;
+    font-size: 0.8rem;
+    background-color: #6c757d;
+}
+
+.control-btn:hover {
+    background-color: #5a6268;
+}
+
+/* モード切替スイッチ */
+.mode-switch-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #333; /* 細い黒色の実線で枠取り */
+    border-radius: 8px;
+    gap: 12px;
+}
+
+.mode-label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.gamma-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin-top: 2px; /* 2px下にずらす */
+}
+
+/* 最短路探索エリア */
+.shortest-path-section {
+    height: 16%; /* 全体の約1/5 */
+    min-height: 140px; /* 入力欄が大きいため最低限の高さ */
+    background-color: rgba(255, 193, 7, 0.05);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#shortest-path-label {
+    background-color: rgba(255, 193, 7, 0.7);
+    border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+    color: #333;
+    flex-shrink: 0;
+}
+
+.shortest-path-content {
+    flex-grow: 1; /* スペースを最大限活用 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* ★ 上下の真ん中に配置 */
+    padding: 10px;
+}
+
+.vertex-input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.vertex-input {
+    width: 55px;         /* 幅を広めに */
+    padding: 7px;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: "Cambria Math", serif;
+    background-color: white;
+}
+
+.vertex-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.3);
+}
+
+.arrow-separator {
+    font-size: 1.5rem;
+    color: #ffc107;
+    font-weight: bold;
+}
+
+#shortest-path-btn {
+    margin: 8px;
+    background-color: #ffc107;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.9rem;
+    padding: 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+#shortest-path-btn:hover {
+    background-color: #e0a800;
+}
+
+#gamma-input {
+    width: 50px;
+    padding: 2px 5px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: "Cambria Math", serif;
+}
+
+#gamma-input:invalid {
+    border-color: #dc3545;
+}
+
+.input-warning {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 5px;
+    display: none;
+    z-index: 2100;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.input-warning::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: #dc3545;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ced4da;
+    transition: .3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+}
+
+input:checked + .slider {
+    background-color: #007bff;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #007bff;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* 右パネルの分割エリア */
+.resizer-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#panel-top {
+    flex: 2;
+}
+
+#panel-bottom {
+    flex: 3;
+}
+
+.panel-area {
+    display: flex;
+    flex-direction: column;
+    min-height: 50px;
+    background-color: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    position: relative; /* 子要素の絶対配置の基準 */
+}
+
+.panel-label {
+    font-size: 0.8rem;
+    color: #fff; /* 背景色に合わせて白抜きに */
+    padding: 4px 8px;
+    background-color: #f1f3f5;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+}
+
+#used-edges-label {
+    background-color: rgba(156, 39, 176, 0.7); /* 若干濃い紫色 */
+    border-bottom-color: rgba(156, 39, 176, 0.2);
+}
+
+#unused-edges-label {
+    background-color: rgba(40, 167, 69, 0.7); /* 若干濃い緑色 */
+    border-bottom-color: rgba(40, 167, 69, 0.2);
+}
+
+.panel-content {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* 辺のリストアイテム（帯） */
+.edge-list-container {
+    background-color: #fff;
+    border: 1px solid #eee;
+    margin: 5px;
+    border-radius: 4px;
+    min-height: 50px;
+    transition: all 0.2s;
+}
+
+#used-edges-list {
+    background-color: rgba(156, 39, 176, 0.03);
+    border-color: rgba(156, 39, 176, 0.15);
+}
+
+#unused-edges-list {
+    background-color: rgba(40, 167, 69, 0.03);
+    border-color: rgba(40, 167, 69, 0.15);
+}
+
+.edge-list-container.drag-over {
+    background-color: #f1f3f5;
+    border-color: #007bff;
+}
+
+#used-edges-list:empty::before {
+    content: "辺をドラッグ＆ドロップで追加";
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #adb5bd;
+    font-size: 0.85rem;
+    pointer-events: none;
+    text-align: center;
+}
+
+.edge-strip {
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: grab;
+    user-select: none;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edge-strip:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.edge-strip:active {
+    cursor: grabbing;
+}
+
+.edge-strip.dragging {
+    opacity: 0.5;
+    background-color: #e2e6ea;
+}
+
+.edge-strip .edge-info {
+    font-family: "Cambria Math", serif;
+}
+
+.edge-strip .edge-weight {
+    font-weight: bold;
+    color: #007bff;
+    background-color: #e7f1ff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+/* 永続的なハイライトスタイル */
+.edge-strip.highlighted {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    box-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+}
+
+.resizer-handle {
+    height: 12px; /* 少し太くして掴みやすくする */
+    background-color: #f1f3f5;
+    cursor: row-resize;
+    transition: background-color 0.2s;
+    margin: 2px 0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resizer-handle::after {
+    content: "≡"; /* 三のようなマーク */
+    color: #888; /* 色を濃く変更 */
+    font-size: 14px;
+    line-height: 1;
+    margin-top: -2px;
+}
+
+.resizer-handle:hover, .resizer-handle.dragging {
+    background-color: #ced4da;
+}
+
+.resizer-handle:hover::after, .resizer-handle.dragging::after {
+    color: #333; /* ホバー時はさらに濃く */
+}
+
+/* フローティングウィンドウ（計算結果） */
+.floating-window {
+    position: fixed;
+    top: 70px;
+    right: 300px;
+    width: auto;         /* 式の長さに合わせて自動調整 */
+    min-width: 240px;    /* 最小幅を維持 */
+    max-width: 80vw;     /* 画面からはみ出さないように制限 */
+    background-color: rgba(255, 245, 255, 0.9);
+    border: 1px solid #9c27b0;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(156, 39, 176, 0.2);
+    z-index: 3000;
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.window-header {
+    padding: 8px 12px;
+    background-color: rgba(156, 39, 176, 0.8); /* 紫色 */
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: move;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-counter {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    font-weight: normal;
+}
+
+.window-content {
+    padding: 0; /* 履歴アイテムでパディングを管理するため0にする */
+    font-family: "Cambria Math", serif;
+    max-height: 300px; /* 履歴用に少し広げる */
+    overflow-y: auto;
+}
+
+.window-content .placeholder {
+    padding: 15px; /* 左右上下にゆとりを持たせる */
+    color: #999;
+    font-size: 0.85rem;
+    margin: 0;
+    font-family: sans-serif;
+    text-align: center;
+}
+
+.history-item {
+    position: relative;
+    padding: 12px;
+    border-bottom: 1px solid #e1bee7;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #adb5bd;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.delete-btn:hover {
+    color: #dc3545;
+    background-color: transparent;
+}
+
+.formula-text {
+    font-size: 0.95rem;
+    color: #495057;
+    margin-bottom: 8px;
+    white-space: nowrap; /* 改行させない */
+    overflow-x: auto;    /* 長い場合は横スクロール */
+    padding-bottom: 4px;
+    padding-right: 25px; /* 削除ボタンとの被り防止 */
+}
+
+/* スクロールバーを細くする（式用） */
+.formula-text::-webkit-scrollbar {
+    height: 3px;
+}
+.formula-text::-webkit-scrollbar-thumb {
+    background: #e1bee7;
+    border-radius: 3px;
+}
+
+.result-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #9c27b0; /* 紫色 */
+    text-align: right;
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.history-tag {
+    font-size: 0.95rem;
+    background-color: #ffc107;
+    color: #333;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    white-space: nowrap;
+    position: relative;
+    top: 5px;    /* 少し下に移動 */
+    left: -5px;  /* 少し左に移動 */
+}
+
+/* パネル下部の案内メッセージ */
+.info-message {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    font-size: 0.7rem;
+    color: #adb5bd; /* 色を濃くして視認性を向上 */
+    font-weight: 500;
+    text-align: center;
+    pointer-events: none; /* ドラッグ操作を妨げない */
+    z-index: 0;
+    display: none;
+}
+
+/* 紫色ハイライトスタイル（計算実行時） */
+.edge-strip.calculated {
+    outline: 2px solid #9c27b0;
+    outline-offset: -2px;
+    border-color: #9c27b0;
+    z-index: 1; /* 重なり順を少し上げる */
+}

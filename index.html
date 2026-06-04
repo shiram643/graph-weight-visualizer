@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>グラフ可視化・重み計算ツール</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+</head>
+<body>
+
+<h1>グラフ可視化・重み計算</h1>
+
+<!-- 左パネル: 入力パネル -->
+<div id="sidebar-left" class="sidebar-panel">
+    <button id="toggle-left" class="toggle-btn">◀</button>
+    <h2>入力パネル</h2>
+    <p class="description">
+        頂点と辺の情報を入力してください。<br>
+        形式: <code>頂点1 頂点2 重み</code><br>
+        例: <code>S G 10</code>
+    </p>
+    <textarea id="input-data" placeholder="S A 4&#10;A B 2&#10;B G 5&#10;S G 10">S A 4
+A B 2
+B G 4
+S G 9
+A G 1
+B C 3
+C A 6
+C S 2</textarea>
+    <button id="update-btn">グラフを生成</button>
+    <div class="controls">
+        <button class="control-btn" id="direction-btn">有向 / 無向 切替</button>
+        <button class="control-btn" id="layout-btn">再配置</button>
+        <button class="control-btn" id="fit-btn" style="grid-column: span 2;">全体を表示</button>
+    </div>
+</div>
+
+<!-- 右パネル: 操作パネル -->
+<div id="sidebar-right" class="sidebar-panel">
+    <button id="toggle-right" class="toggle-btn">▶</button>
+    <h2>計算パネル</h2>
+    <div class="mode-switch-section">
+        <span class="mode-label">通常</span>
+        <label class="switch">
+            <input type="checkbox" id="mode-toggle">
+            <span class="slider round"></span>
+        </label>
+        <span class="mode-label">割引率</span>
+        <div class="gamma-container">
+            <input type="number" id="gamma-input" step="0.01" min="0.1" max="1" value="0.95" placeholder="γ">
+            <div id="gamma-warning" class="input-warning">0 < γ ≤ 1 の範囲で入力してください</div>
+        </div>
+    </div>
+
+    <!-- 最短路探索エリア -->
+    <div class="shortest-path-section">
+        <div class="panel-label" id="shortest-path-label">最短経路の自動探索</div>
+        <div class="shortest-path-content">
+            <div class="vertex-input-row">
+                <input type="text" id="start-vertex" class="vertex-input" value="S" maxlength="5">
+                <span class="arrow-separator">→</span>
+                <input type="text" id="target-vertex" class="vertex-input" value="G" maxlength="5">
+            </div>
+        </div>
+        <button id="shortest-path-btn">最短路を探索</button>
+    </div>
+
+    <div class="resizer-container">
+        <div id="panel-top" class="panel-area">
+            <div id="used-edges-label" class="panel-label">使用辺</div>
+            <div id="used-edges-list" class="panel-content edge-list-container"></div>
+            <div id="edge-order-info" class="info-message">使用辺の順序は経路の順路に対応しています</div>
+        </div>
+        <div id="resizer-h" class="resizer-handle"></div>
+        <div id="panel-bottom" class="panel-area">
+            <div id="unused-edges-label" class="panel-label">未使用辺</div>
+            <div id="unused-edges-list" class="panel-content edge-list-container">
+                <!-- はじめにすべての辺がここに並ぶ -->
+            </div>
+            <button id="calc-sum-btn" style="margin: 5px; background-color: #9c27b0;">重みの合計を計算</button>
+        </div>
+    </div>
+</div>
+
+<!-- 計算結果表示ウィンドウ（可動式） -->
+<div id="result-window" class="floating-window">
+    <div id="result-window-header" class="window-header">
+        計算結果
+        <span id="history-counter" class="history-counter">(0/10)</span>
+    </div>
+    <div id="result-content" class="window-content">
+        <p class="placeholder">計算結果がここに表示されます</p>
+    </div>
+</div>
+
+<div id="main">
+    <div id="cy"></div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
