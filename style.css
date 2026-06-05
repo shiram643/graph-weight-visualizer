@@ -17,13 +17,14 @@ h1 {
     height: 100vh;
     margin: 0;
     display: flex;
-    align-items: center;
+    align-items: flex-start; /* 中央ではなく上部に配置 */
     justify-content: center;
-    font-size: 6rem; /* 大幅に拡大 */
+    padding-top: 25vh;      /* 15vhから25vhに変更して少し下げる */
+    font-size: 6rem;
     color: #007bff;
-    background-color: rgba(255, 255, 255, 0.75); /* 起動中はUIを薄く隠す */
+    background-color: transparent; /* 背景を透明にする */
     z-index: 5000;
-    pointer-events: all; /* 起動中は背後の操作を不可にする */
+    pointer-events: none; /* 背景が透明なのでクリックを透過させる */
     transition: opacity 0.8s ease, visibility 0.8s;
     white-space: nowrap;
     text-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
@@ -151,21 +152,17 @@ button:hover {
     background-color: #0056b3;
 }
 
-.controls {
-    margin-top: 1rem;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.control-btn {
-    padding: 8px;
-    font-size: 0.8rem;
-    background-color: #6c757d;
-}
-
-.control-btn:hover {
-    background-color: #5a6268;
+/* 有向・無向切替スイッチ（左パネル用） */
+.direction-switch-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #333; /* 細い黒色の実線で枠取り */
+    border-radius: 8px;
+    gap: 12px;
 }
 
 /* モード切替スイッチ */
@@ -196,8 +193,8 @@ button:hover {
 
 /* 最短路探索エリア */
 .shortest-path-section {
-    height: 14%; /* 全体の約1/5 */
-    min-height: 140px; /* 入力欄が大きいため最低限の高さ */
+    height: 16%; /* 全体の約1/5 */
+    /* min-height: 140px; 入力欄が大きいため最低限の高さ */
     background-color: rgba(255, 193, 7, 0.05);
     border: 1px solid rgba(255, 193, 7, 0.2);
     border-radius: 8px;
@@ -231,7 +228,7 @@ button:hover {
 
 .vertex-input {
     width: 55px;         /* 幅を広めに */
-    padding: 7px;
+    padding: 6px;
     border: 1px solid #ffc107;
     border-radius: 4px;
     text-align: center;
@@ -688,3 +685,166 @@ input:checked + .slider:before {
     border-color: #9c27b0;
     z-index: 1; /* 重なり順を少し上げる */
 }
+
+/* グラフ内コントロールパネル（中央下） */
+.graph-floating-panel {
+    position: absolute;
+    bottom: 24px;                 /* 20px * 1.2 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    min-width: 240px;             /* 200px * 1.2 */
+    height: 60px;                 /* 50px * 1.2 */
+    padding: 0 18px;              /* 15px * 1.2 */
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;          /* 12px * 1.2 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;                    /* 10px * 1.2 */
+    z-index: 1000;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
+    pointer-events: auto;
+}
+
+.graph-ctrl-btn {
+    padding: 8px 18px;            /* 6px, 15px * 1.2 */
+    font-size: 1rem;              /* 0.85rem * 1.2 */
+    font-weight: 500;
+    color: #495057;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid #ced4da;
+    border-radius: 7px;           /* 6px * 1.2 */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.graph-ctrl-btn:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.graph-ctrl-btn:active {
+    background-color: #e9ecef;
+    transform: translateY(1px);
+}
+
+/* 特定の操作ボタンの色（薄い青） */
+#layout-btn, #fit-btn {
+    background-color: #e7f1ff;
+    border-color: #b3d7ff;
+    color: #0056b3;
+}
+
+#layout-btn:hover, #fit-btn:hover {
+    background-color: #cfe2ff;
+    border-color: #9ec5fe;
+}
+
+/* ズームコントロール */
+.zoom-controls-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;                     /* 5px * 1.2 */
+    background-color: rgba(0, 0, 0, 0.03);
+    padding: 4px 10px;            /* 3px, 8px * 1.2 */
+    border-radius: 10px;          /* 8px * 1.2 */
+    margin-left: 6px;             /* 5px * 1.2 */
+}
+
+.zoom-btn {
+    background: none;
+    border: none;
+    color: #495057;
+    font-size: 1rem;              /* 0.8rem * 1.2 */
+    cursor: pointer;
+    padding: 6px;                 /* 5px * 1.2 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.zoom-btn:hover {
+    color: #007bff;
+}
+
+.zoom-input-box {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ced4da;
+    border-radius: 5px;           /* 4px * 1.2 */
+    padding: 2px 6px;             /* 2px, 5px * 1.2 */
+}
+
+#zoom-input {
+    width: 54px;                  /* 45px * 1.2 */
+    border: none;
+    font-size: 1rem;              /* 0.85rem * 1.2 */
+    text-align: right;
+    font-weight: bold;
+    color: #333;
+    padding: 0;
+}
+
+#zoom-input:focus {
+    outline: none;
+}
+
+/* Chrome, Safari, Edge, Opera のスピンボタンを非表示にする */
+#zoom-input::-webkit-outer-spin-button,
+#zoom-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox のスピンボタンを非表示にする */
+#zoom-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.zoom-percent-unit {
+    font-size: 0.75rem;
+    color: #666;
+    margin-left: 2px;
+}
+
+/* 再配置中オーバーレイ */
+.layout-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 1.0); /* 完全に不透明にしてグラフを隠す */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.layout-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-content {
+    /* 枠や背景を消して、文字だけが浮かび上がるようにする */
+    text-align: center;
+}
+
+.loading-text {
+    font-size: 5rem; /* 巨大化 */
+    font-weight: bold;
+    color: #007bff;
+    letter-spacing: 0.1em;
+    text-shadow: 0 10px 30px rgba(0, 123, 255, 0.2); /* 起動ロゴと合わせた影 */
+}
+

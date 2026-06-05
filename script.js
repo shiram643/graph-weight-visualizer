@@ -1,6 +1,30 @@
 let cy;
 let isDirected = false;
 
+// レイアウトの共通設定
+const layoutConfig = {
+    name: 'cose',
+    animate: true,
+    nodeRepulsion: 1000000,
+    idealEdgeLength: 200,
+    edgeElasticity: 100,
+    nodeOverlap: 50,
+    refresh: 20,
+    fit: false,                   // 独自関数で制御するためfalseにする
+    padding: 100,
+    randomize: false,
+    componentSpacing: 200,
+    nodeDimensionsIncludeLabels: true
+};
+
+// グラフを適切な余白を持って画面内に収める関数
+function fitGraph() {
+    // パディングを80pxに抑えて表示サイズを拡大し、全体を30px上にずらす
+    // 下部パネル（約70px）を避けつつ、画面を有効活用する
+    cy.fit(undefined, 80);
+    cy.panBy({ x: 0, y: -30 });
+}
+
 function initCytoscape() {
     cy = cytoscape({
         container: document.getElementById('cy'),
@@ -21,10 +45,10 @@ function initCytoscape() {
                     'color': '#ffffff',
                     'text-valign': 'center',
                     'text-halign': 'center',
-                    'width': '25px',
-                    'height': '25px',
+                    'width': '100px',
+                    'height': '100px',
                     'font-family': '"Cambria Math", serif',
-                    'font-size': '12px',
+                    'font-size': '48px',
                     'font-weight': 'bold',
                     'active-bg-opacity': 0,
                     'overlay-opacity': 0
@@ -49,18 +73,18 @@ function initCytoscape() {
             {
                 selector: 'edge',
                 style: {
-                    'width': 2,
+                    'width': 12,
                     'line-color': '#adb5bd',
                     'target-arrow-color': '#adb5bd',
                     'target-arrow-shape': isDirected ? 'triangle' : 'none',
                     'curve-style': 'bezier',
                     'label': 'data(weight)',
                     'font-family': '"Cambria Math", serif',
-                    'font-size': '10px',
+                    'font-size': '40px',
                     'color': '#000',
                     'text-background-opacity': 1,
                     'text-background-color': '#ffffff',
-                    'text-background-padding': '2px',
+                    'text-background-padding': '8px',
                     'text-background-shape': 'roundrectangle',
                     'edge-text-rotation': 'none',
                     'active-bg-opacity': 0,
@@ -70,7 +94,7 @@ function initCytoscape() {
             {
                 selector: 'node.highlighted',
                 style: {
-                    'border-width': 3,
+                    'border-width': 12,
                     'border-color': '#ffc107'
                 }
             },
@@ -78,7 +102,7 @@ function initCytoscape() {
                 selector: 'edge.highlighted',
                 style: {
                     'line-color': '#ffc107',
-                    'width': 4,
+                    'width': 16,
                     'text-background-color': '#ffc107',
                     'text-background-opacity': 1,
                     'target-arrow-color': '#ffc107'
@@ -88,21 +112,21 @@ function initCytoscape() {
                 selector: 'edge.path-purple',
                 style: {
                     'underlay-color': '#9c27b0',
-                    'underlay-padding': '3px',
+                    'underlay-padding': '12px',
                     'underlay-opacity': 1,
                     'underlay-shape': 'buffer',
                     'line-cap': 'butt',              /* 端を丸めず切り落とす */
                     'target-arrow-color': '#9c27b0',
                     'arrow-scale': 1,               /* 黄色ハイライト(1.0)とサイズを統一 */
-                    'target-distance-from-node': '-2px', /* ノードに食い込ませてハミ出しを隠す */
-                    'width': 4,                      /* 常に4pxに固定（黄色ハイライトと同じ幅にし、二重の太り防止） */
+                    'target-distance-from-node': '-8px', /* ノードに食い込ませてハミ出しを隠す */
+                    'width': 16,                      /* 常に16pxに固定 */
                     'z-index': 9999
                 }
             },
             {
                 selector: 'node.path-purple',
                 style: {
-                    'border-width': 3,
+                    'border-width': 12,
                     'border-color': '#9c27b0',
                     'border-opacity': 1,
                     'z-index': 9999
@@ -133,9 +157,23 @@ function initCytoscape() {
             }
         }
     });
+
+    // レイアウト実行時のオーバーレイ制御
+    cy.on('layoutstart', () => {
+        document.getElementById('layout-loading').classList.add('active');
+    });
+
+    cy.on('layoutstop', () => {
+        document.getElementById('layout-loading').classList.remove('active');
+        fitGraph(); // レイアウト完了時に独自のフィットを実行
+    });
 }
 
 function updateGraph() {
+    // ステータス表示を「グラフ生成中」に変更
+    const loadingText = document.querySelector('.loading-text');
+    if (loadingText) loadingText.textContent = "グラフ生成中";
+
     const text = document.getElementById('input-data').value;
     const lines = text.trim().split('\n');
     
@@ -198,7 +236,7 @@ function updateGraph() {
     cy.elements().remove();
     cy.add(elements);
     applyStyles(); // 方向の設定を適用
-    cy.layout({ name: 'cose', animate: true }).run();
+    cy.layout(layoutConfig).run();
     updateEdgeLists(); // 右パネルの辺リストを更新
 }
 
@@ -273,10 +311,6 @@ function applyStyles() {
             'target-arrow-shape': isDirected ? 'triangle' : 'none'
         })
         .update();
-    
-    const btn = document.getElementById('direction-btn');
-    btn.textContent = isDirected ? '有向グラフ' : '無向グラフ';
-    btn.style.backgroundColor = isDirected ? '#dc3545' : '#28a745';
 
     // 右パネルの帯の矢印/線を更新
     const separator = isDirected ? '→' : '-';
@@ -297,17 +331,52 @@ window.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('update-btn').addEventListener('click', updateGraph);
     
-    document.getElementById('direction-btn').addEventListener('click', () => {
-        isDirected = !isDirected;
+    document.getElementById('direction-toggle').addEventListener('change', (e) => {
+        isDirected = e.target.checked;
         applyStyles();
     });
 
     document.getElementById('fit-btn').addEventListener('click', () => {
-        cy.fit();
+        fitGraph();
     });
 
     document.getElementById('layout-btn').addEventListener('click', () => {
-        cy.layout({ name: 'cose', animate: true }).run();
+        // ステータス表示を「再配置中」に変更
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) loadingText.textContent = "再配置中";
+        cy.layout(layoutConfig).run();
+    });
+
+    // ズーム操作のロジック
+    const zoomInput = document.getElementById('zoom-input');
+    
+    // ズーム率を更新する補助関数
+    const updateZoomDisplay = () => {
+        const zoomLevel = cy.zoom();
+        zoomInput.value = Math.round(zoomLevel * 100);
+    };
+
+    document.getElementById('zoom-out-btn').addEventListener('click', () => {
+        cy.zoom(cy.zoom() * 0.8);
+        updateZoomDisplay();
+    });
+
+    document.getElementById('zoom-in-btn').addEventListener('click', () => {
+        cy.zoom(cy.zoom() * 1.2);
+        updateZoomDisplay();
+    });
+
+    zoomInput.addEventListener('change', () => {
+        let val = parseFloat(zoomInput.value);
+        if (isNaN(val) || val < 1) val = 1;
+        if (val > 1000) val = 1000;
+        cy.zoom(val / 100);
+        cy.center(); // 入力時は中央に寄せる
+    });
+
+    // マウスホイール等の操作時にも数値を同期
+    cy.on('zoom', () => {
+        updateZoomDisplay();
     });
 
     // 最短路探索ボタンのイベント

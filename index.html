@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>グラフ可視化・重み計算ツール</title>
+    <title>グラフ視覚化・重み計算ツール</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
 </head>
 <body>
 
-<h1>グラフ可視化・重み計算</h1>
+<h1>グラフ視覚化・重み計算</h1>
 
 <!-- 左パネル: 入力パネル -->
 <div id="sidebar-left" class="sidebar-panel">
@@ -21,20 +21,26 @@
         形式: <code>頂点1 頂点2 重み</code><br>
         例: <code>S G 10</code>
     </p>
-    <textarea id="input-data" placeholder="S A 4&#10;A B 2&#10;B G 5&#10;S G 10">S A 4
+    <textarea id="input-data" placeholder="S A 4&#10;A B 2&#10;B G 5&#10;S G 10">S A 7
 A B 2
 B G 4
 S G 9
-A G 1
+G A 1
 B C 3
 C A 6
-C S 2</textarea>
-    <button id="update-btn">グラフを生成</button>
-    <div class="controls">
-        <button class="control-btn" id="direction-btn">有向 / 無向 切替</button>
-        <button class="control-btn" id="layout-btn">再配置</button>
-        <button class="control-btn" id="fit-btn" style="grid-column: span 2;">全体を表示</button>
-    </div>
+C S 2
+</textarea>
+
+<div class="direction-switch-section">
+    <span class="mode-label">無向</span>
+    <label class="switch">
+        <input type="checkbox" id="direction-toggle">
+        <span class="slider round"></span>
+    </label>
+    <span class="mode-label">有向</span>
+</div>
+
+<button id="update-btn">グラフを生成</button>
 </div>
 
 <!-- 右パネル: 操作パネル -->
@@ -97,6 +103,26 @@ C S 2</textarea>
 
 <div id="main">
     <div id="cy"></div>
+    <!-- 再配置中オーバーレイ -->
+    <div id="layout-loading" class="layout-overlay">
+        <div class="loading-content">
+            <span class="loading-text">再配置中...</span>
+        </div>
+    </div>
+    <!-- グラフ内コントロールパネル -->
+    <div id="graph-controls" class="graph-floating-panel">
+        <button class="graph-ctrl-btn" id="layout-btn">再配置</button>
+        <button class="graph-ctrl-btn" id="fit-btn">全体を表示</button>
+        
+        <div class="zoom-controls-wrapper">
+            <button class="zoom-btn" id="zoom-out-btn">◀</button>
+            <div class="zoom-input-box">
+                <input type="number" id="zoom-input" value="100" step="5" min="1" max="1000">
+                <span class="zoom-percent-unit">%</span>
+            </div>
+            <button class="zoom-btn" id="zoom-in-btn">▶</button>
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>
