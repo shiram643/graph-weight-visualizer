@@ -94,8 +94,8 @@ function initCytoscape() {
             {
                 selector: 'node.highlighted',
                 style: {
-                    'border-width': 12,
-                    'border-color': '#ffc107'
+                    'background-color': '#ffc107',
+                    'color': '#000000'
                 }
             },
             {
@@ -166,10 +166,73 @@ function initCytoscape() {
     cy.on('layoutstop', () => {
         document.getElementById('layout-loading').classList.remove('active');
         fitGraph(); // レイアウト完了時に独自のフィットを実行
+        updateVertexStatusPositions(); // レイアウト終了時にも位置を更新
+    });
+
+    // グラフの移動・ズームに合わせて位置を更新
+    cy.on('pan zoom position', () => {
+        updateVertexStatusPositions();
     });
 }
 
+// 頂点に追尾するステータスウィンドウを更新・再配置する関数
+function updateVertexStatusPositions() {
+    const container = document.getElementById('vertex-status-container');
+    if (!container) return;
+
+    cy.nodes().forEach(node => {
+        const statusWin = document.querySelector(`.vertex-status-win[data-node-id="${node.id()}"]`);
+        if (statusWin) {
+            const pos = node.renderedPosition();
+            // 頂点の水平中心に揃える（実際の配置はCSSのtranslateX(-50%)で調整）
+            statusWin.style.left = `${pos.x}px`;
+            statusWin.style.top = `${pos.y - 100}px`;
+        }
+    });
+}
+
+// 任意ステータスの設定処理
+function setupVertexStatuses(inputType) {
+    const statusName = document.getElementById('custom-label-input').value.trim();
+    if (!statusName) {
+        showErrorMessage("ステータス名を入力してください。");
+        return;
+    }
+
+    const container = document.getElementById('vertex-status-container');
+    // 既存のウィンドウをクリア（新しいステータスを設定する場合）
+    container.innerHTML = '';
+
+    cy.nodes().forEach(node => {
+        const statusWin = document.createElement('div');
+        statusWin.className = 'vertex-status-win';
+        statusWin.dataset.nodeId = node.id();
+        statusWin.style.pointerEvents = 'auto'; // 入力可能にする
+
+        const label = document.createElement('div');
+        label.className = 'status-label';
+        label.textContent = `${statusName}:`;
+
+        const input = document.createElement('input');
+        input.type = inputType; // 'number' か 'text'
+        input.className = 'status-input';
+        input.placeholder = inputType === 'number' ? '0' : '入力する';
+
+        statusWin.appendChild(label);
+        statusWin.appendChild(input);
+        container.appendChild(statusWin);
+    });
+
+    updateVertexStatusPositions();
+}
+
 function updateGraph() {
+    // 任意ステータスの設定をリセット
+    const statusContainer = document.getElementById('vertex-status-container');
+    if (statusContainer) statusContainer.innerHTML = '';
+    const statusInput = document.getElementById('custom-label-input');
+    if (statusInput) statusInput.value = '';
+
     // ステータス表示を「グラフ生成中」に変更
     const loadingText = document.querySelector('.loading-text');
     if (loadingText) loadingText.textContent = "グラフ生成中";
@@ -347,6 +410,10 @@ window.addEventListener('DOMContentLoaded', () => {
         cy.layout(layoutConfig).run();
     });
 
+    // 任意ステータスの設定ボタン
+    document.getElementById('set-numeric-btn').addEventListener('click', () => setupVertexStatuses('number'));
+    document.getElementById('set-string-btn').addEventListener('click', () => setupVertexStatuses('text'));
+
     // ズーム操作のロジック
     const zoomInput = document.getElementById('zoom-input');
     
@@ -383,7 +450,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const shortestPathBtn = document.getElementById('shortest-path-btn');
     shortestPathBtn.addEventListener('click', async () => {
         if (!pyodideReady) {
-            alert("Pythonの準備中です。少々お待ちください。");
+            showErrorMessage("Pythonの準備中です。少々お待ちください。");
             return;
         }
 
@@ -408,7 +475,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const targetNode = document.getElementById('target-vertex').value.trim();
 
         if (!startNode || !targetNode) {
-            alert("始点と終点を入力してください。");
+            showErrorMessage("始点と終点を入力してください。");
             return;
         }
 
@@ -474,7 +541,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            alert("探索中にエラーが発生しました: " + error.message);
+            showErrorMessage("探索中にエラーが発生しました: " + error.message);
         }
     });
 
@@ -564,7 +631,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const calcBtn = document.getElementById('calc-sum-btn');
     calcBtn.addEventListener('click', async () => {
         if (!pyodideReady) {
-            alert("Pythonの準備中です。少々お待ちください。");
+            showErrorMessage("Pythonの準備中です。少々お待ちください。");
             return;
         }
 
@@ -739,6 +806,23 @@ window.addEventListener('DOMContentLoaded', () => {
 let pyodide;
 let pyodideReady = false;
 
+// カスタムエラーメッセージを表示する関数
+function showErrorMessage(message) {
+    const container = document.getElementById('custom-error-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    // アニメーション終了後に削除（3.0s = slideDown 0.3s + fadeOut 0.3s + delay 2.4s）
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // Pythonコードを直接埋め込み（file:// プロトコル対策）
 const pythonCode = `
 def calculate_sum(edges_list, is_directed, is_discount_mode, gamma):
@@ -865,6 +949,6 @@ async function initPyodide() {
         console.error("Pyodide initialization failed:", error);
         calcBtn.textContent = "Python起動失敗: " + error.message.substring(0, 10);
         // 詳細なエラーをアラートで表示（デバッグ用）
-        alert("Pythonの起動に失敗しました。コンソールを確認してください。\nError: " + error.message);
+        showErrorMessage("Pythonの起動に失敗しました。コンソールを確認してください。\nError: " + error.message);
     }
 }

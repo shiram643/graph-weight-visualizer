@@ -10,6 +10,8 @@
 </head>
 <body>
 
+<div id="custom-error-container" class="error-toast-container"></div>
+
 <h1>グラフ視覚化・重み計算</h1>
 
 <!-- 左パネル: 入力パネル -->
@@ -30,6 +32,17 @@ B C 3
 C A 6
 C S 2
 </textarea>
+
+<div class="label-setting-section">
+    <div class="panel-label" style="background-color: #e57373; color: white;">任意ステータス設定</div>
+    <div class="label-input-area">
+        <input type="text" id="custom-label-input" placeholder="ステータス名">
+        <div class="status-btn-row">
+            <button id="set-numeric-btn" class="status-action-btn">数値で設定</button>
+            <button id="set-string-btn" class="status-action-btn">文字列で設定</button>
+        </div>
+    </div>
+</div>
 
 <div class="direction-switch-section">
     <span class="mode-label">無向</span>
@@ -103,6 +116,8 @@ C S 2
 
 <div id="main">
     <div id="cy"></div>
+    <!-- 頂点ステータスのオーバーレイコンテナ -->
+    <div id="vertex-status-container" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1000; width: 100%; height: 100%; overflow: hidden;"></div>
     <!-- 再配置中オーバーレイ -->
     <div id="layout-loading" class="layout-overlay">
         <div class="loading-content">
@@ -112,7 +127,6 @@ C S 2
     <!-- グラフ内コントロールパネル -->
     <div id="graph-controls" class="graph-floating-panel">
         <button class="graph-ctrl-btn" id="layout-btn">再配置</button>
-        <button class="graph-ctrl-btn" id="fit-btn">全体を表示</button>
         
         <div class="zoom-controls-wrapper">
             <button class="zoom-btn" id="zoom-out-btn">◀</button>
@@ -122,6 +136,8 @@ C S 2
             </div>
             <button class="zoom-btn" id="zoom-in-btn">▶</button>
         </div>
+
+        <button class="graph-ctrl-btn" id="fit-btn">全体を表示</button>
     </div>
 </div>
 

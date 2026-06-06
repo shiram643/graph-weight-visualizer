@@ -8,6 +8,45 @@ body {
     background-color: #f8f9fa;
 }
 
+/* カスタムエラーメッセージ */
+.error-toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.error-toast {
+    background-color: #ff5252;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+    font-weight: bold;
+    font-size: 1rem;
+    pointer-events: auto;
+    animation: errorSlideDown 0.3s ease-out forwards, fadeOut 0.3s ease-in 2.7s forwards;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@keyframes errorSlideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; visibility: hidden; }
+}
+
 /* 起動スプラッシュ画面（旧タイトル） */
 h1 {
     position: fixed;
@@ -163,6 +202,54 @@ button:hover {
     border: 1px solid #333; /* 細い黒色の実線で枠取り */
     border-radius: 8px;
     gap: 12px;
+}
+
+/* 任意ステータス設定エリア（左パネル用） */
+.label-setting-section {
+    margin-bottom: 15px;
+    background-color: #fff5f5; /* 薄い赤色 */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.label-input-area {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+}
+
+.status-btn-row {
+    display: flex;
+    gap: 8px;
+}
+
+#custom-label-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.status-action-btn {
+    flex: 1;
+    padding: 8px 5px;
+    background-color: #e57373; /* 淡い赤色 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.status-action-btn:hover {
+    background-color: #d32f2f; /* 少し濃い赤色 */
 }
 
 /* モード切替スイッチ */
@@ -710,7 +797,8 @@ input:checked + .slider:before {
 }
 
 .graph-ctrl-btn {
-    padding: 8px 18px;            /* 6px, 15px * 1.2 */
+    padding: 8px 12px;            /* パディングを調整 */
+    width: 120px;                 /* 幅を固定して中央寄せを正確にする */
     font-size: 1rem;              /* 0.85rem * 1.2 */
     font-weight: 500;
     color: #495057;
@@ -720,6 +808,7 @@ input:checked + .slider:before {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
+    text-align: center;
 }
 
 .graph-ctrl-btn:hover {
@@ -753,7 +842,7 @@ input:checked + .slider:before {
     background-color: rgba(0, 0, 0, 0.03);
     padding: 4px 10px;            /* 3px, 8px * 1.2 */
     border-radius: 10px;          /* 8px * 1.2 */
-    margin-left: 6px;             /* 5px * 1.2 */
+    margin: 0;                    /* マージンをリセット */
 }
 
 .zoom-btn {
@@ -846,5 +935,50 @@ input:checked + .slider:before {
     color: #007bff;
     letter-spacing: 0.1em;
     text-shadow: 0 10px 30px rgba(0, 123, 255, 0.2); /* 起動ロゴと合わせた影 */
+}
+
+/* 頂点追尾ステータスウィンドウ */
+.vertex-status-win {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid #e57373;
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: row; /* 水平表示に変更 */
+    align-items: center;
+    gap: 10px;
+    min-width: auto;
+    z-index: 1001;
+    transform: translateX(-50%); /* 水平中央に揃える */
+    animation: fadeIn 0.2s ease-out;
+    white-space: nowrap;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translate(-50%, 5px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.status-label {
+    font-size: 1.1rem; /* 文字サイズを大きく */
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+.status-input {
+    width: 100px; /* 入力欄の幅を指定 */
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 1.1rem; /* 文字サイズを大きく */
+    box-sizing: border-box;
+}
+
+.status-input:focus {
+    outline: none;
+    border-color: #e57373;
+    box-shadow: 0 0 0 2px rgba(229, 115, 115, 0.2);
 }
 
