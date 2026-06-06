@@ -934,7 +934,7 @@ async function initPyodide() {
         
         pyodideReady = true;
         calcBtn.disabled = false;
-        calcBtn.textContent = "重みの合計を計算";
+        calcBtn.textContent = "重み合計を計算";
         console.log("Pyodide is ready.");
 
         // 見出し（スプラッシュ画面）を非表示にする
