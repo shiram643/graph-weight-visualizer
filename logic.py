@@ -9,7 +9,7 @@
 # '''
 # def calculate_sum(edges_list, is_directed, is_discount_mode, gamma):
 #     """
-#     使用辺のリストを受け取り、連結性をチェックしながら重みの合計を計算する。
+#     使用辺のリストを受け取り、連結性をチェックしながら重み合計を計算する。
 #     
 #     引数:
 #     - edges_list (list): JavaScriptから渡される辺データのリスト。各要素は source, target, weight を持つ。
