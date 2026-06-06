@@ -250,7 +250,8 @@ function updateGraph() {
         if (parts.length >= 3) {
             const source = parts[0];
             const target = parts[1];
-            const weight = parseFloat(parts[2]);
+            // 数値でない場合は0として扱う
+            const weight = parseFloat(parts[2]) || 0;
 
             if (!nodeSet.has(source)) {
                 elements.push({ data: { id: source } });
@@ -290,7 +291,7 @@ function updateGraph() {
                     id: source + '-' + target + '-' + Math.random(),
                     source: source,
                     target: target,
-                    weight: ''
+                    weight: 0 // 未入力時は0
                 }
             });
         }
@@ -399,6 +400,32 @@ window.addEventListener('DOMContentLoaded', () => {
         applyStyles();
     });
 
+    // 重みなし切り替え
+    document.getElementById('no-weight-toggle').addEventListener('change', (e) => {
+        const isNoWeight = e.target.checked;
+        const mask = document.getElementById('no-weight-mask');
+        const statusLabel = document.getElementById('weight-status-label');
+        const resultWindow = document.getElementById('result-window');
+        
+        if (isNoWeight) {
+            mask.classList.add('active');
+            if (statusLabel) statusLabel.textContent = "重みなし";
+            if (resultWindow) resultWindow.classList.add('transparent-mode');
+            // グラフの重みラベルを非表示にする
+            cy.style().selector('edge').style({
+                'label': ''
+            }).update();
+        } else {
+            mask.classList.remove('active');
+            if (statusLabel) statusLabel.textContent = "重みあり";
+            if (resultWindow) resultWindow.classList.remove('transparent-mode');
+            // グラフの重みラベルを再表示する
+            cy.style().selector('edge').style({
+                'label': 'data(weight)'
+            }).update();
+        }
+    });
+
     document.getElementById('fit-btn').addEventListener('click', () => {
         fitGraph();
     });
@@ -408,6 +435,19 @@ window.addEventListener('DOMContentLoaded', () => {
         const loadingText = document.querySelector('.loading-text');
         if (loadingText) loadingText.textContent = "再配置中";
         cy.layout(layoutConfig).run();
+    });
+
+    // ハイライト解除ボタンのイベント
+    document.getElementById('clear-highlights-btn').addEventListener('click', () => {
+        // グラフ上のハイライトを解除
+        cy.elements().removeClass('highlighted');
+        cy.elements().removeClass('path-purple');
+        
+        // サイドパネル（帯）のハイライトを解除
+        document.querySelectorAll('.edge-strip').forEach(strip => {
+            strip.classList.remove('highlighted');
+            strip.classList.remove('calculated');
+        });
     });
 
     // 任意ステータスの設定ボタン
@@ -457,17 +497,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const isDiscountMode = document.getElementById('mode-toggle').checked;
         if (isDiscountMode) {
             // 割引率モード時のエラー表示
-            const resultContent = document.getElementById('result-content');
-            const errorItem = document.createElement('div');
-            errorItem.className = 'history-item';
-            errorItem.innerHTML = `
-                <button class="delete-btn">×</button>
-                <p style="color: #5c1a1a; font-weight: bold; text-align: center; margin: 0;">割引率ありの探索方法は実装されていません</p>
-            `;
-            const placeholder = resultContent.querySelector('.placeholder');
-            if (placeholder) placeholder.remove();
-            resultContent.insertBefore(errorItem, resultContent.firstChild);
-            updateHistoryCounter();
+            addHistoryItem({ error: "割引率ありの探索方法は実装されていません" });
             return;
         }
 
@@ -492,17 +522,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) {
                 // エラー表示（履歴にも追加）
-                const resultContent = document.getElementById('result-content');
-                const errorItem = document.createElement('div');
-                errorItem.className = 'history-item';
-                errorItem.innerHTML = `
-                    <button class="delete-btn">×</button>
-                    <p style="color: #5c1a1a; font-weight: bold; text-align: center; margin: 0;">${result.error}</p>
-                `;
-                const placeholder = resultContent.querySelector('.placeholder');
-                if (placeholder) placeholder.remove();
-                resultContent.insertBefore(errorItem, resultContent.firstChild);
-                updateHistoryCounter();
+                addHistoryItem({ error: result.error });
                 return;
             }
 
@@ -541,7 +561,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            showErrorMessage("探索中にエラーが発生しました: " + error.message);
+            addHistoryItem({ error: `探索エラー: ${error.message}` });
         }
     });
 
@@ -636,10 +656,10 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         const usedEdges = document.querySelectorAll('#used-edges-list .edge-strip');
-        const resultContent = document.getElementById('result-content');
         
         if (usedEdges.length === 0) {
-            resultContent.innerHTML = '<p class="placeholder" style="padding: 12px;">使用辺がありません</p>';
+            // 履歴がリセットされないよう、単一の項目として追加
+            addHistoryItem({ error: "使用辺がありません" });
             return;
         }
 
@@ -675,49 +695,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const resultProxy = pyodide.globals.get('calculate_sum')(pyEdges, isDirected, isDiscountMode, gamma);
             const result = resultProxy.toJs({dict_converter: Object.fromEntries});
             
-            // 履歴アイテムを作成
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            
-            if (result.error) {
-                historyItem.innerHTML = `
-                    <button class="delete-btn">×</button>
-                    <p style="color: #5c1a1a; font-weight: bold; text-align: center; margin: 0;">${result.error}</p>
-                `;
-            } else {
-                const tagHtml = window._isShortestPathResult ? '<div class="history-tag">最短路自動探索</div>' : '<div></div>';
-                historyItem.innerHTML = `
-                    <button class="delete-btn">×</button>
-                    <div class="formula-text">${result.formula}</div>
-                    <div class="result-row">
-                        ${tagHtml}
-                        <div class="result-text">= ${result.total}</div>
-                    </div>
-                `;
-            }
+            // 履歴に追加
+            addHistoryItem(result, window._isShortestPathResult);
 
-            // 削除ボタンのイベント
-            historyItem.querySelector('.delete-btn').addEventListener('click', () => {
-                historyItem.remove();
-                if (resultContent.children.length === 0) {
-                    resultContent.innerHTML = '<p class="placeholder">計算結果がここに表示されます</p>';
-                }
-            });
-
-            // プレースホルダーを削除
-            const placeholder = resultContent.querySelector('.placeholder');
-            if (placeholder) placeholder.remove();
-
-            // 先頭に追加
-            resultContent.insertBefore(historyItem, resultContent.firstChild);
             updateOrderInfoVisibility();
-            updateHistoryCounter();
-
-            // 最大10個までに制限
-            while (resultContent.querySelectorAll('.history-item').length > 10) {
-                resultContent.lastChild.remove();
-                updateHistoryCounter();
-            }
 
             // メモリ解放
             pyEdges.destroy();
@@ -725,13 +706,51 @@ window.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             console.error(error);
-            const errorItem = document.createElement('div');
-            errorItem.className = 'history-item';
-            errorItem.innerHTML = `<p style="color:red; margin: 0;">計算エラー: ${error.message}</p>`;
-            resultContent.insertBefore(errorItem, resultContent.firstChild);
-            updateHistoryCounter();
+            addHistoryItem({ error: `計算エラー: ${error.message}` });
         }
     });
+
+    /**
+     * 計算結果を履歴ウィンドウに追加する
+     * @param {Object} result - Pythonからの戻り値 {formula, total, error}
+     * @param {boolean} isShortestPath - 最短路自動探索の結果かどうか
+     */
+    function addHistoryItem(result, isShortestPath = false) {
+        const resultContent = document.getElementById('result-content');
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        
+        if (result.error) {
+            historyItem.innerHTML = `
+                <button class="delete-btn" title="削除">×</button>
+                <p style="color: #5c1a1a; font-weight: bold; text-align: center; margin: 0;">${result.error}</p>
+            `;
+        } else {
+            const tagHtml = isShortestPath ? '<div class="history-tag">最短路自動探索</div>' : '<div></div>';
+            historyItem.innerHTML = `
+                <button class="delete-btn" title="削除">×</button>
+                <div class="formula-text">${result.formula}</div>
+                <div class="result-row">
+                    ${tagHtml}
+                    <div class="result-text">= ${result.total}</div>
+                </div>
+            `;
+        }
+
+        // プレースホルダーを削除
+        const placeholder = resultContent.querySelector('.placeholder');
+        if (placeholder) placeholder.remove();
+
+        // 先頭に追加
+        resultContent.insertBefore(historyItem, resultContent.firstChild);
+        updateHistoryCounter();
+
+        // 最大10個までに制限
+        while (resultContent.querySelectorAll('.history-item').length > 10) {
+            resultContent.lastChild.remove();
+            updateHistoryCounter();
+        }
+    }
 
     // 履歴カウンタの更新
     function updateHistoryCounter() {
@@ -861,7 +880,13 @@ def calculate_sum(edges_list, is_directed, is_discount_mode, gamma):
                 visited_nodes.update([u, v])
             
             # 重みの計算
-            w = float(w_val) if w_val else 0
+            try:
+                import math
+                w = float(w_val) if w_val is not None and w_val != "" else 0
+                if math.isnan(w): w = 0
+            except:
+                w = 0
+            
             if is_discount_mode:
                 multiplier = gamma ** i
                 val = multiplier * w

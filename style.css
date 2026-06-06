@@ -191,22 +191,103 @@ button:hover {
     background-color: #0056b3;
 }
 
-/* 有向・無向切替スイッチ（左パネル用） */
-.direction-switch-section {
+/* 設定行（左パネル用、横並び配置） */
+.settings-row {
     display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* 切り替えセクション共通 */
+.switch-section {
+    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 10px 0;
-    margin-bottom: 10px;
     background-color: #f8f9fa;
     border: 1px solid #333; /* 細い黒色の実線で枠取り */
     border-radius: 8px;
-    gap: 12px;
+}
+
+.direction-section {
+    flex: 3; /* 有向無向トグルを少し広めに */
+}
+
+.weight-toggle-section {
+    flex: 2; /* チェックボックス側 */
+}
+
+.switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* 標準チェックボックス用スタイル */
+.real-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.real-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #007bff; /* チェック時に青色にする */
+}
+
+.weight-note {
+    font-size: 0.65rem;
+    color: #888;
+    text-align: center;
+    padding: 0 5px;
+    margin-top: 4px;
+}
+
+/* パネルマスク（重みなしモード用） */
+.panel-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.85); /* 白色半透明 */
+    z-index: 2500; /* パネル内容より上に配置 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.panel-mask.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto; /* マスク時は操作をブロック */
+}
+
+.mask-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #495057;
+    text-align: center;
+    line-height: 1.4;
+    padding: 20px;
 }
 
 /* 任意ステータス設定エリア（左パネル用） */
 .label-setting-section {
-    margin-bottom: 15px;
+    margin-bottom: 10px;       /* 15pxから10pxに縮小 */
     background-color: #fff5f5; /* 薄い赤色 */
     overflow: hidden;
     display: flex;
@@ -216,8 +297,8 @@ button:hover {
 .label-input-area {
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    gap: 10px;
+    padding: 8px 10px;         /* 上下を10pxから8pxに微縮小 */
+    gap: 8px;                  /* 10pxから8pxに縮小 */
 }
 
 .status-btn-row {
@@ -266,7 +347,7 @@ button:hover {
 }
 
 .mode-label {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: #495057;
 }
@@ -629,6 +710,12 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: opacity 0.3s ease; /* 透明度変更用 */
+}
+
+.floating-window.transparent-mode {
+    opacity: 0;
+    pointer-events: none; /* 透明時は操作不可にする */
 }
 
 .window-header {
@@ -780,7 +867,7 @@ input:checked + .slider:before {
     left: 50%;
     transform: translateX(-50%);
     width: auto;
-    min-width: 240px;             /* 200px * 1.2 */
+    min-width: 300px;             /* 少し広げる */
     height: 60px;                 /* 50px * 1.2 */
     padding: 0 18px;              /* 15px * 1.2 */
     background-color: rgba(255, 255, 255, 0.7);
@@ -790,21 +877,26 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;                    /* 10px * 1.2 */
+    gap: 14px;                    /* ボタン間の隙間を少し広げる */
     z-index: 1000;
     box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
     pointer-events: auto;
 }
 
+.ctrl-group {
+    display: flex;
+    gap: 8px;
+}
+
 .graph-ctrl-btn {
-    padding: 8px 12px;            /* パディングを調整 */
-    width: 120px;                 /* 幅を固定して中央寄せを正確にする */
-    font-size: 1rem;              /* 0.85rem * 1.2 */
+    padding: 8px 14px;
+    min-width: 100px;             /* 120pxから少し小さく調整 */
+    font-size: 1rem;
     font-weight: 500;
     color: #495057;
     background-color: rgba(255, 255, 255, 0.8);
     border: 1px solid #ced4da;
-    border-radius: 7px;           /* 6px * 1.2 */
+    border-radius: 7px;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -834,6 +926,19 @@ input:checked + .slider:before {
     border-color: #9ec5fe;
 }
 
+/* ハイライト解除ボタンの色（背景・文字は黄色、枠線は紫） */
+#clear-highlights-btn {
+    background-color: #fff9db;    /* 薄い黄色 */
+    border-color: #9c27b0;        /* 紫色 */
+    color: #856404;               /* 濃い黄色/茶色 */
+}
+
+#clear-highlights-btn:hover {
+    background-color: #fff3bf;
+    border-color: #7b1fa2;        /* 濃い紫 */
+    color: #5c4300;
+}
+
 /* ズームコントロール */
 .zoom-controls-wrapper {
     display: flex;
@@ -842,7 +947,7 @@ input:checked + .slider:before {
     background-color: rgba(0, 0, 0, 0.03);
     padding: 4px 10px;            /* 3px, 8px * 1.2 */
     border-radius: 10px;          /* 8px * 1.2 */
-    margin: 0;                    /* マージンをリセット */
+    margin: 0 4px;                /* 前後に少し余白 */
 }
 
 .zoom-btn {

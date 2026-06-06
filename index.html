@@ -21,14 +21,16 @@
     <p class="description">
         頂点と辺の情報を入力してください。<br>
         形式: <code>頂点1 頂点2 重み</code><br>
-        例: <code>S G 10</code>
+        例: <code>S G 10</code><br>
+        <span class="weight-note">※重みが未入力、または文字列の場合は0として扱う</span>
     </p>
     <textarea id="input-data" placeholder="S A 4&#10;A B 2&#10;B G 5&#10;S G 10">S A 7
-A B 2
-B G 4
-S G 9
-G A 1
-B C 3
+S A 7
+A G 2
+G B 4
+S B 9
+B A 1
+G C 3
 C A 6
 C S 2
 </textarea>
@@ -44,13 +46,24 @@ C S 2
     </div>
 </div>
 
-<div class="direction-switch-section">
-    <span class="mode-label">無向</span>
-    <label class="switch">
-        <input type="checkbox" id="direction-toggle">
-        <span class="slider round"></span>
-    </label>
-    <span class="mode-label">有向</span>
+<div class="settings-row">
+    <div class="switch-section direction-section">
+        <div class="switch-row">
+            <span class="mode-label">無向</span>
+            <label class="switch">
+                <input type="checkbox" id="direction-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span class="mode-label">有向</span>
+        </div>
+    </div>
+
+    <div class="switch-section weight-toggle-section">
+        <label class="real-checkbox-label">
+            <input type="checkbox" id="no-weight-toggle">
+            <span id="weight-status-label">重みあり</span>
+        </label>
+    </div>
 </div>
 
 <button id="update-btn">グラフを生成</button>
@@ -58,6 +71,8 @@ C S 2
 
 <!-- 右パネル: 操作パネル -->
 <div id="sidebar-right" class="sidebar-panel">
+    <!-- 重みなしモード用マスク -->
+    <div id="no-weight-mask" class="panel-mask"></div>
     <button id="toggle-right" class="toggle-btn">▶</button>
     <h2>計算パネル</h2>
     <div class="mode-switch-section">
@@ -126,7 +141,10 @@ C S 2
     </div>
     <!-- グラフ内コントロールパネル -->
     <div id="graph-controls" class="graph-floating-panel">
-        <button class="graph-ctrl-btn" id="layout-btn">再配置</button>
+        <div class="ctrl-group">
+            <button class="graph-ctrl-btn" id="layout-btn">再配置</button>
+            <button class="graph-ctrl-btn" id="fit-btn">全体を表示</button>
+        </div>
         
         <div class="zoom-controls-wrapper">
             <button class="zoom-btn" id="zoom-out-btn">◀</button>
@@ -137,7 +155,7 @@ C S 2
             <button class="zoom-btn" id="zoom-in-btn">▶</button>
         </div>
 
-        <button class="graph-ctrl-btn" id="fit-btn">全体を表示</button>
+        <button class="graph-ctrl-btn" id="clear-highlights-btn">ハイライト解除</button>
     </div>
 </div>
 
