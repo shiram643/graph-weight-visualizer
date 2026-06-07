@@ -287,50 +287,184 @@ button:hover {
 
 /* 任意ステータス設定エリア（左パネル用） */
 .label-setting-section {
-    margin-bottom: 10px;       /* 15pxから10pxに縮小 */
+    margin-bottom: 15px;
     background-color: #fff5f5; /* 薄い赤色 */
-    overflow: hidden;
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .label-input-area {
     display: flex;
     flex-direction: column;
-    padding: 8px 10px;         /* 上下を10pxから8pxに微縮小 */
-    gap: 8px;                  /* 10pxから8pxに縮小 */
+    padding: 10px;
+    gap: 6px;
+    max-height: 240px;
+    overflow-y: auto;
 }
 
-.status-btn-row {
+/* ステータス設定項目（帯スタイル） */
+.status-setting-strip {
     display: flex;
-    gap: 8px;
-}
-
-#custom-label-input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ced4da;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background-color: white;
+    border: 1px solid #dee2e6;
     border-radius: 4px;
-    font-size: 1rem;
-    font-family: inherit;
-    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.status-action-btn {
-    flex: 1;
-    padding: 8px 5px;
-    background-color: #e57373; /* 淡い赤色 */
+.status-name-input {
+    width: 60%;
+    border: 1px solid transparent;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    padding: 2px 4px;
+    font-weight: bold;
+    color: #c62828;
+    background-color: transparent;
+}
+
+.status-name-input:focus {
+    outline: none;
+    border-bottom-color: #e57373;
+    background-color: #fff8f8;
+}
+
+.status-setting-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-type-select-mini {
+    padding: 2px;
+    font-size: 0.8rem;
+    border: 1px solid #eee;
+    border-radius: 3px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.status-del-btn {
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    line-height: 1;
+    background-color: #ffcdd2;
+    color: #c62828;
+    border-radius: 50%;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.status-del-btn:hover {
+    background-color: #ef9a9a;
+}
+
+.status-add-master-btn {
+    margin: 0 10px 10px;
+    padding: 8px;
+    background-color: #e57373;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.status-add-master-btn:hover:not(:disabled) {
+    background-color: #d32f2f;
+}
+
+.status-add-master-btn:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}
+
+.status-add-btn {
+    padding: 8px 12px;
+    background-color: #e57373;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.85rem;
-    white-space: nowrap;
+    font-weight: bold;
     transition: background-color 0.2s;
 }
 
-.status-action-btn:hover {
-    background-color: #d32f2f; /* 少し濃い赤色 */
+.status-add-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 追加済みステータスリスト */
+.active-status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+}
+
+.active-status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    background-color: white;
+    border: 1px solid #ffcdd2;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.status-item-info {
+    font-weight: bold;
+    color: #c62828;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100px;
+}
+
+.status-item-controls {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.status-item-type-select {
+    padding: 2px;
+    font-size: 0.75rem;
+    border: 1px solid #eee;
+    border-radius: 3px;
+}
+
+.status-item-del-btn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    line-height: 1;
+    background-color: #ffcdd2;
+    color: #c62828;
+    border-radius: 50%;
+    font-size: 14px;
+}
+
+.status-item-del-btn:hover {
+    background-color: #ef9a9a;
 }
 
 /* モード切替スイッチ */
@@ -929,7 +1063,7 @@ input:checked + .slider:before {
 /* ハイライト解除ボタンの色（背景・文字は黄色、枠線は紫） */
 #clear-highlights-btn {
     background-color: #fff9db;    /* 薄い黄色 */
-    border-color: #9c27b0;        /* 紫色 */
+    border: 4px solid #9c27b0;    /* 紫色の実線 4px */
     color: #856404;               /* 濃い黄色/茶色 */
 }
 
@@ -1051,14 +1185,24 @@ input:checked + .slider:before {
     padding: 8px 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: flex;
-    flex-direction: row; /* 水平表示に変更 */
-    align-items: center;
-    gap: 10px;
-    min-width: auto;
+    flex-direction: column;
+    align-items: stretch; /* 子要素を幅いっぱいに広げる */
+    gap: 8px;
+    width: auto;
+    min-width: 160px;
+    max-width: 400px;
     z-index: 1001;
-    transform: translateX(-50%); /* 水平中央に揃える */
+    transform: translateX(-50%);
     animation: fadeIn 0.2s ease-out;
     white-space: nowrap;
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 左ラベル、右入力欄 */
+    gap: 15px;
+    width: 100%;
 }
 
 @keyframes fadeIn {
@@ -1067,18 +1211,25 @@ input:checked + .slider:before {
 }
 
 .status-label {
-    font-size: 1.1rem; /* 文字サイズを大きく */
+    font-size: 1.1rem;
     font-weight: bold;
     color: #d32f2f;
+    flex-shrink: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .status-input {
-    width: 100px; /* 入力欄の幅を指定 */
+    min-width: 100px;
+    max-width: 250px;
     border: 1px solid #ced4da;
     border-radius: 4px;
     padding: 4px 8px;
-    font-size: 1.1rem; /* 文字サイズを大きく */
+    font-size: 1.1rem;
     box-sizing: border-box;
+    text-align: right;
+    transition: width 0.1s ease;
 }
 
 .status-input:focus {

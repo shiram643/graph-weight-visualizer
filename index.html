@@ -36,13 +36,10 @@ C S 2
 
 <div class="label-setting-section">
     <div class="panel-label" style="background-color: #e57373; color: white;">任意ステータス設定</div>
-    <div class="label-input-area">
-        <input type="text" id="custom-label-input" placeholder="ステータス名">
-        <div class="status-btn-row">
-            <button id="set-numeric-btn" class="status-action-btn">数値で設定</button>
-            <button id="set-string-btn" class="status-action-btn">文字列で設定</button>
-        </div>
+    <div id="status-settings-list" class="label-input-area">
+        <!-- 追加されたステータスの設定欄（帯スタイル）がここに並ぶ -->
     </div>
+    <button id="add-status-btn" class="status-add-master-btn">ステータスを追加</button>
 </div>
 
 <div class="settings-row">
@@ -158,7 +155,9 @@ C S 2
     </div>
 </div>
 
-<script src="script.js"></script>
-
+<script src="graph-core.js"></script>
+<script src="python-bridge.js"></script>
+<script src="ui-controller.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
