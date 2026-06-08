@@ -169,9 +169,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const panelTop = document.getElementById('panel-top');
     const container = resizer.parentElement;
     let isDragging = false;
+    let startY, startHeight;
 
     resizer.addEventListener('mousedown', (e) => {
         isDragging = true;
+        startY = e.clientY;
+        startHeight = panelTop.offsetHeight;
         resizer.classList.add('dragging');
         document.body.style.cursor = 'row-resize';
         document.body.style.userSelect = 'none';
@@ -181,8 +184,19 @@ window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const containerRect = container.getBoundingClientRect();
-        const relativeY = e.clientY - containerRect.top;
-        const newHeight = Math.max(50, Math.min(relativeY, containerRect.height - 50));
+        const resizerHeight = 16; 
+        
+        // 最小サイズをコンテナの縦幅の16%に設定
+        const minPanelHeight = containerRect.height * 0.16; 
+        
+        // マウスの移動量から新しい高さを計算
+        const deltaY = e.clientY - startY;
+        let newHeight = startHeight + deltaY;
+        
+        // 下部パネルも16%を確保できるように制限
+        const maxTopHeight = containerRect.height - minPanelHeight - resizerHeight;
+        
+        newHeight = Math.max(minPanelHeight, Math.min(newHeight, maxTopHeight));
         panelTop.style.flex = 'none';
         panelTop.style.height = `${newHeight}px`;
     });

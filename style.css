@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -195,7 +199,7 @@ button:hover {
 .settings-row {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 /* 切り替えセクション共通 */
@@ -473,7 +477,7 @@ button:hover {
     align-items: center;
     justify-content: center;
     padding: 10px 0;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     background-color: #f8f9fa;
     border: 1px solid #333; /* 細い黒色の実線で枠取り */
     border-radius: 8px;
@@ -496,6 +500,7 @@ button:hover {
 /* 最短路探索エリア */
 .shortest-path-section {
     height: 16%; /* 全体の約1/5 */
+    flex-shrink: 0; /* ★ リサイズ時に潰れないように固定 */
     /* min-height: 140px; 入力欄が大きいため最低限の高さ */
     background-color: rgba(255, 193, 7, 0.05);
     border: 1px solid rgba(255, 193, 7, 0.2);
@@ -566,8 +571,20 @@ button:hover {
     background-color: #e0a800;
 }
 
+#calc-sum-btn {
+    margin: 10px 5px 5px 5px;
+    background-color: #9c27b0;
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0; /* ★ リサイズ時に潰れないように固定 */
+}
+
+#calc-sum-btn:hover {
+    background-color: #7b1fa2;
+}
+
 #gamma-input {
-    width: 50px;
+    width: 65px;
     padding: 2px 5px;
     border: 1px solid #ced4da;
     border-radius: 4px;
@@ -681,7 +698,7 @@ input:checked + .slider:before {
 .panel-area {
     display: flex;
     flex-direction: column;
-    min-height: 50px;
+    min-height: 16%; /* 12%から16%に再調整 */
     background-color: #fdfdfd;
     border: 1px solid #eee;
     border-radius: 4px;
