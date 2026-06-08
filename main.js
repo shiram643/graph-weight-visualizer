@@ -115,17 +115,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const resultProxy = pyodide.globals.get('find_shortest_path')(pyEdges, startNode, targetNode, isDirected);
             const result = resultProxy.toJs({dict_converter: Object.fromEntries});
             
-            cy.nodes('.path-purple').removeClass('path-purple');
-
             if (result.error) {
                 addHistoryItem({ error: result.error });
                 return;
             }
-
-            const startElem = cy.getElementById(startNode);
-            const targetElem = cy.getElementById(targetNode);
-            if (startElem.length > 0) startElem.addClass('path-purple');
-            if (targetElem.length > 0) targetElem.addClass('path-purple');
 
             const usedList = document.getElementById('used-edges-list');
             const unusedList = document.getElementById('unused-edges-list');
@@ -244,17 +237,18 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         document.querySelectorAll('.edge-strip.calculated').forEach(s => s.classList.remove('calculated'));
-        cy.edges('.path-purple').removeClass('path-purple');
-        
-        if (!window._isShortestPathResult) {
-            cy.nodes('.path-purple').removeClass('path-purple');
-        }
+        // 既存の紫ハイライト（エッジ・ノード両方）を一括解除
+        cy.elements('.path-purple').removeClass('path-purple');
 
         const edgesData = Array.from(usedEdges).map(strip => {
             const edgeId = strip.dataset.edgeId;
             const edge = cy.getElementById(edgeId);
             strip.classList.add('calculated');
+            
+            // エッジと、それに接続する全ノードを紫ハイライト
             edge.addClass('path-purple');
+            edge.connectedNodes().addClass('path-purple');
+            
             return edge.data();
         });
 
